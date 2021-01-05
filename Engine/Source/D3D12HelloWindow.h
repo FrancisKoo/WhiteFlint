@@ -13,6 +13,8 @@
 
 #include "DXSample.h"
 
+using namespace DirectX;
+
 // Note that while ComPtr is used to manage the lifetime of resources on the CPU,
 // it has no understanding of the lifetime of resources on the GPU. Apps must account
 // for the GPU lifetime of resources to avoid destroying objects that may still be
@@ -33,16 +35,29 @@ public:
 private:
     static const UINT FrameCount = 2;
 
+    struct Vertex
+    {
+        XMFLOAT3 position;
+        XMFLOAT4 color;
+    };
+
     // Pipeline objects.
+    CD3DX12_VIEWPORT m_viewport;
+    CD3DX12_RECT m_scissorRect;
     com_ptr<IDXGISwapChain3> m_swapChain;
     com_ptr<ID3D12Device> m_device;
     com_ptr<ID3D12Resource> m_renderTargets[FrameCount];
     com_ptr<ID3D12CommandAllocator> m_commandAllocator;
     com_ptr<ID3D12CommandQueue> m_commandQueue;
+    com_ptr<ID3D12RootSignature> m_rootSignature;
     com_ptr<ID3D12DescriptorHeap> m_rtvHeap;
     com_ptr<ID3D12PipelineState> m_pipelineState;
     com_ptr<ID3D12GraphicsCommandList> m_commandList;
     UINT m_rtvDescriptorSize;
+
+    // App resources.
+    com_ptr<ID3D12Resource> m_vertexBuffer;
+    D3D12_VERTEX_BUFFER_VIEW m_vertexBufferView;
 
     // Synchronization objects.
     UINT m_frameIndex;
