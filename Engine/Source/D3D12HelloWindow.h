@@ -27,18 +27,21 @@ class D3D12HelloWindow : public DXSample
 public:
     D3D12HelloWindow(UINT width, UINT height, std::wstring name);
 
-    virtual void OnInit();
-    virtual void OnUpdate();
-    virtual void OnRender();
-    virtual void OnDestroy();
+    void OnInit() override;
+    void OnUpdate() override;
+    void OnRender() override;
+    void OnDestroy() override;
 
 private:
     static const UINT FrameCount = 2;
+    static const UINT TextureWidth = 256;
+    static const UINT TextureHeight = 256;
+    static const UINT TexturePixelSize = 4;    // The number of bytes used to represent a pixel in the texture.
 
     struct Vertex
     {
         XMFLOAT3 position;
-        XMFLOAT4 color;
+        XMFLOAT2 uv;
     };
 
     // Pipeline objects.
@@ -51,6 +54,7 @@ private:
     com_ptr<ID3D12CommandQueue> m_commandQueue;
     com_ptr<ID3D12RootSignature> m_rootSignature;
     com_ptr<ID3D12DescriptorHeap> m_rtvHeap;
+    com_ptr<ID3D12DescriptorHeap> m_srvHeap;
     com_ptr<ID3D12PipelineState> m_pipelineState;
     com_ptr<ID3D12GraphicsCommandList> m_commandList;
     UINT m_rtvDescriptorSize;
@@ -58,6 +62,7 @@ private:
     // App resources.
     com_ptr<ID3D12Resource> m_vertexBuffer;
     D3D12_VERTEX_BUFFER_VIEW m_vertexBufferView;
+    com_ptr<ID3D12Resource> m_texture;
 
     // Synchronization objects.
     UINT m_frameIndex;
@@ -67,6 +72,7 @@ private:
 
     void LoadPipeline();
     void LoadAssets();
+    std::vector<UINT8> GenerateTextureData();
     void PopulateCommandList();
     void WaitForPreviousFrame();
 };
