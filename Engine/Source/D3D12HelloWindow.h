@@ -41,6 +41,13 @@ private:
         XMFLOAT4 color;
     };
 
+    struct SceneConstantBuffer
+    {
+        XMFLOAT4 offset;
+        float padding[60]; // Padding so the constant buffer is 256-byte aligned.
+    };
+    static_assert((sizeof(SceneConstantBuffer) % 256) == 0, "Constant Buffer size must be 256-byte aligned");
+
     // Pipeline objects.
     CD3DX12_VIEWPORT m_viewport;
     CD3DX12_RECT m_scissorRect;
@@ -48,18 +55,20 @@ private:
     com_ptr<ID3D12Device> m_device;
     com_ptr<ID3D12Resource> m_renderTargets[FrameCount];
     com_ptr<ID3D12CommandAllocator> m_commandAllocator;
-    com_ptr<ID3D12CommandAllocator> m_bundleAllocator;
     com_ptr<ID3D12CommandQueue> m_commandQueue;
     com_ptr<ID3D12RootSignature> m_rootSignature;
     com_ptr<ID3D12DescriptorHeap> m_rtvHeap;
+    com_ptr<ID3D12DescriptorHeap> m_cbvHeap;
     com_ptr<ID3D12PipelineState> m_pipelineState;
     com_ptr<ID3D12GraphicsCommandList> m_commandList;
-    com_ptr<ID3D12GraphicsCommandList> m_bundle;
     UINT m_rtvDescriptorSize;
 
     // App resources.
     com_ptr<ID3D12Resource> m_vertexBuffer;
     D3D12_VERTEX_BUFFER_VIEW m_vertexBufferView;
+    com_ptr<ID3D12Resource> m_constantBuffer;
+    SceneConstantBuffer m_constantBufferData;    
+    UINT8* m_pCbvDataBegin;
 
     // Synchronization objects.
     UINT m_frameIndex;
