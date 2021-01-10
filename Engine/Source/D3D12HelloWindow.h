@@ -33,6 +33,14 @@ public:
     void OnDestroy() override;
 
 private:
+    // In this sample we overload the meaning of FrameCount to mean both the maximum
+    // number of frames that will be queued to the GPU at a time, as well as the number
+    // of back buffers in the DXGI swap chain. For the majority of applications, this
+    // is convenient and works well. However, there will be certain cases where an
+    // application may want to queue up more frames than there are back buffers
+    // available.
+    // It should be noted that excessive buffering of frames dependent on user input
+    // may result in noticeable latency in your app.
     static const UINT FrameCount = 2;
 
     struct Vertex
@@ -41,24 +49,16 @@ private:
         XMFLOAT4 color;
     };
 
-    struct SceneConstantBuffer
-    {
-        XMFLOAT4 offset;
-        float padding[60]; // Padding so the constant buffer is 256-byte aligned.
-    };
-    static_assert((sizeof(SceneConstantBuffer) % 256) == 0, "Constant Buffer size must be 256-byte aligned");
-
     // Pipeline objects.
     CD3DX12_VIEWPORT m_viewport;
     CD3DX12_RECT m_scissorRect;
     com_ptr<IDXGISwapChain3> m_swapChain;
     com_ptr<ID3D12Device> m_device;
     com_ptr<ID3D12Resource> m_renderTargets[FrameCount];
-    com_ptr<ID3D12CommandAllocator> m_commandAllocator;
+    com_ptr<ID3D12CommandAllocator> m_commandAllocators[FrameCount];
     com_ptr<ID3D12CommandQueue> m_commandQueue;
     com_ptr<ID3D12RootSignature> m_rootSignature;
     com_ptr<ID3D12DescriptorHeap> m_rtvHeap;
-    com_ptr<ID3D12DescriptorHeap> m_cbvHeap;
     com_ptr<ID3D12PipelineState> m_pipelineState;
     com_ptr<ID3D12GraphicsCommandList> m_commandList;
     UINT m_rtvDescriptorSize;
@@ -66,18 +66,16 @@ private:
     // App resources.
     com_ptr<ID3D12Resource> m_vertexBuffer;
     D3D12_VERTEX_BUFFER_VIEW m_vertexBufferView;
-    com_ptr<ID3D12Resource> m_constantBuffer;
-    SceneConstantBuffer m_constantBufferData;    
-    UINT8* m_pCbvDataBegin;
 
     // Synchronization objects.
     UINT m_frameIndex;
     HANDLE m_fenceEvent;
     com_ptr<ID3D12Fence> m_fence;
-    UINT64 m_fenceValue;
+    UINT64 m_fenceValues[FrameCount];
 
     void LoadPipeline();
     void LoadAssets();
     void PopulateCommandList();
-    void WaitForPreviousFrame();
+    void MoveToNextFram();
+    void WaitForGpu();
 };
