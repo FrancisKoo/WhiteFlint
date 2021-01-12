@@ -65,7 +65,8 @@ StyleCopReport.xml
 *_h.h
 *.ilk
 *.meta
-*.obj
+# Don't ignore WaveFront OBJ
+# *.obj 
 *.iobj
 *.pch
 *.pdb

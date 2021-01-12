@@ -66,6 +66,9 @@
     <ClInclude Include="Source\D3D12HelloWindow.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Source\WaveFrontReader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Source\Engine.rc">

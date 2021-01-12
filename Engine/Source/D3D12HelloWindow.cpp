@@ -12,6 +12,8 @@
 #include "pch.h"
 #include "D3D12HelloWindow.h"
 
+#include "WaveFrontReader.h"
+
 D3D12HelloWindow::D3D12HelloWindow(UINT width, UINT height, std::wstring name) :
     DXSample(width, height, name),
     m_frameIndex(0),
@@ -198,6 +200,12 @@ void D3D12HelloWindow::LoadAssets()
 
     // Create the vertex buffer.
     {
+        // Load mesh file.
+        {
+            WaveFrontReader<uint32_t> objReader;
+            ThrowIfFailed(objReader.Load(GetAssetFullPath(L"Cube.obj").c_str()));
+        }
+
         // Define the geometry for a triangle.
         Vertex triangleVertices[] =
         {

@@ -97,6 +97,10 @@
     <CustomBuildStep>
       <TreatOutputAsContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</TreatOutputAsContent>
     </CustomBuildStep>
+    <PreBuildEvent>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)'=='Release'">
     <ClCompile>
@@ -123,6 +127,10 @@
     <CustomBuildStep>
       <TreatOutputAsContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</TreatOutputAsContent>
     </CustomBuildStep>
+    <PreBuildEvent>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+      </Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <Manifest Include="Engine.exe.manifest" />
@@ -149,6 +157,7 @@
     <ClInclude Include="Source\DXSampleHelper.h" />
     <ClInclude Include="Source\pch.h" />
     <ClInclude Include="Source\resource.h" />
+    <ClInclude Include="Source\WaveFrontReader.h" />
     <ClInclude Include="Source\Win32Application.h" />
   </ItemGroup>
   <ItemGroup>
