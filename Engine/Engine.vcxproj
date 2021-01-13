@@ -141,6 +141,7 @@
     </Text>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Source\Camera.cpp" />
     <ClCompile Include="Source\D3D12HelloWindow.cpp" />
     <ClCompile Include="Source\DXSample.cpp" />
     <ClCompile Include="Source\pch.cpp">
@@ -151,6 +152,7 @@
     <ClCompile Include="Source\WinMain.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Source\Camera.h" />
     <ClInclude Include="Source\D3D12HelloWindow.h" />
     <ClInclude Include="Source\d3dx12.h" />
     <ClInclude Include="Source\DXSample.h" />

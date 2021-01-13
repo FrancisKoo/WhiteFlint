@@ -32,6 +32,9 @@ public:
     void OnRender() override;
     void OnDestroy() override;
 
+    void OnKeyDown(UINT8 key) override;
+    //void OnKeyUp(UINT key);
+
 private:
     // In this sample we overload the meaning of FrameCount to mean both the maximum
     // number of frames that will be queued to the GPU at a time, as well as the number
@@ -47,6 +50,12 @@ private:
     {
         XMFLOAT3 position;
         XMFLOAT4 color;
+    };
+
+    struct VSConstants
+    {
+        XMFLOAT4X4 model;
+        float padding[48];
     };
 
     // Pipeline objects.
@@ -66,6 +75,12 @@ private:
     // App resources.
     com_ptr<ID3D12Resource> m_vertexBuffer;
     D3D12_VERTEX_BUFFER_VIEW m_vertexBufferView;
+
+    // Vertex shader constants.
+    com_ptr<ID3D12Resource> m_vsConstantsBuffer;
+    VSConstants m_vsConstantsData;
+    com_ptr<ID3D12DescriptorHeap> m_cbvHeap;
+    UINT8* m_pVSConstantsData;
 
     // Synchronization objects.
     UINT m_frameIndex;
