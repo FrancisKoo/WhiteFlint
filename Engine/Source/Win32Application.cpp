@@ -22,6 +22,10 @@ int Win32Application::Run(DXSample* pSample, HINSTANCE hInstance, int nCmdShow)
     pSample->ParseCommandLineArgs(argv, argc);
     LocalFree(argv);
 
+    // Initialize the keyboard class.
+    std::unique_ptr<DirectX::Keyboard> keyboard;
+    keyboard = std::make_unique<DirectX::Keyboard>();
+
     // Initialize the window class.
     WNDCLASSEX windowClass = { 0 };
     windowClass.cbSize = sizeof(WNDCLASSEX);
@@ -87,6 +91,10 @@ LRESULT CALLBACK Win32Application::WindowProc(HWND hWnd, UINT message, WPARAM wP
         }
         return 0;
 
+    case WM_ACTIVATEAPP:
+        DirectX::Keyboard::ProcessMessage(message, wParam, lParam);
+        return 0;
+
     case WM_KEYDOWN:
         if (pSample)
         {
@@ -99,6 +107,10 @@ LRESULT CALLBACK Win32Application::WindowProc(HWND hWnd, UINT message, WPARAM wP
         {
             pSample->OnKeyUp(static_cast<UINT8>(wParam));
         }
+        return 0;
+
+    case WM_SYSKEYUP:
+        DirectX::Keyboard::ProcessMessage(message, wParam, lParam);
         return 0;
 
     case WM_PAINT:

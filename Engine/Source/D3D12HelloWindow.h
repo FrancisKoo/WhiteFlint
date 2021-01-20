@@ -22,6 +22,8 @@ using namespace DirectX;
 // An example of this can be found in the class method: OnDestroy().
 using winrt::com_ptr;
 
+using namespace SimpleMath;
+
 class D3D12HelloWindow : public DXSample
 {
 public:
@@ -48,13 +50,13 @@ private:
 
     struct Vertex
     {
-        XMFLOAT3 position;
-        XMFLOAT4 color;
+        Vector3 position;
+        Vector4 color;
     };
 
     struct VSConstants
     {
-        XMFLOAT4X4 model;
+        Matrix model;
         float padding[48];
     };
 

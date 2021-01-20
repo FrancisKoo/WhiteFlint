@@ -327,6 +327,16 @@ void D3D12HelloWindow::LoadAssets()
 // Update frame-based values.
 void D3D12HelloWindow::OnUpdate()
 {
+    Matrix t;
+    DirectX::Keyboard::State state = Keyboard::Get().GetState();
+    DirectX::Keyboard::KeyboardStateTracker tracker;
+    tracker.Update(state);
+
+    if (state.W)
+    {
+        t = Matrix::CreateTranslation(0.0f, 0.01f, 0.0f);
+    }
+    m_vsConstantsData.model *= t;
 }
 
 // Render the scene.
@@ -356,23 +366,26 @@ void D3D12HelloWindow::OnDestroy()
 
 void D3D12HelloWindow::OnKeyDown(UINT8 key)
 {
-    switch (key)
-    {
-    case 'A':
-        XMStoreFloat4x4(&m_vsConstantsData.model, XMLoadFloat4x4(&m_vsConstantsData.model) * XMMatrixTranslation(-0.01f, 0.0f, 0.0f));
+    Matrix t, r, s;
+	switch (key)
+	{
+	case VK_LEFT:
+        t = Matrix::CreateTranslation(-0.01f, 0.0f, 0.0f);
         break;
-    case 'D':
-        XMStoreFloat4x4(&m_vsConstantsData.model, XMLoadFloat4x4(&m_vsConstantsData.model) * XMMatrixTranslation(0.01f, 0.0f, 0.0f));
+    case VK_RIGHT:
+        t = Matrix::CreateTranslation(0.01f, 0.0f, 0.0f);
         break;
-    case 'W':
-        XMStoreFloat4x4(&m_vsConstantsData.model, XMLoadFloat4x4(&m_vsConstantsData.model) * XMMatrixTranslation(0.0f, 0.01f, 0.0f));
+    case VK_UP:
+        t = Matrix::CreateTranslation(0.0f, 0.01f, 0.0f);
         break;
-    case 'S':
-        XMStoreFloat4x4(&m_vsConstantsData.model, XMLoadFloat4x4(&m_vsConstantsData.model) * XMMatrixTranslation(0.0f, -0.01f, 0.0f));
-        break;
-    default:
-        break;
-    }
+    case VK_DOWN:
+		t = Matrix::CreateTranslation(0.0f, -0.01f, 0.0);
+		break;
+	default:
+		break;
+	}
+
+    m_vsConstantsData.model *= t * s;
 
     memcpy(m_pVSConstantsData, &m_vsConstantsData, sizeof(m_vsConstantsData));
 }
