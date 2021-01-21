@@ -26,12 +26,13 @@ PSInput VSMain(float4 position : POSITION, float4 color : COLOR)
     PSInput result;
     
 	result.position = mul(model, position);
-    result.color = color;
+	result.color = color;
 
     return result;
 }
 
-float4 PSMain(PSInput input) : SV_TARGET
+float4 PSMain(PSInput input, bool bFront : SV_IsFrontFace) : SV_TARGET
 {
-	return input.color;
+	float4 result = bFront ? input.color : float4(0, 0, 0, 1);
+	return result;
 }

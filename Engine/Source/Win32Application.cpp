@@ -13,6 +13,7 @@
 #include "Win32Application.h"
 
 HWND Win32Application::m_hwnd = nullptr;
+std::unique_ptr<DirectX::Keyboard> Win32Application::m_keyboard = std::make_unique<DirectX::Keyboard>();
 
 int Win32Application::Run(DXSample* pSample, HINSTANCE hInstance, int nCmdShow)
 {
@@ -21,10 +22,6 @@ int Win32Application::Run(DXSample* pSample, HINSTANCE hInstance, int nCmdShow)
     LPWSTR* argv = CommandLineToArgvW(GetCommandLineW(), &argc);
     pSample->ParseCommandLineArgs(argv, argc);
     LocalFree(argv);
-
-    // Initialize the keyboard class.
-    std::unique_ptr<DirectX::Keyboard> keyboard;
-    keyboard = std::make_unique<DirectX::Keyboard>();
 
     // Initialize the window class.
     WNDCLASSEX windowClass = { 0 };
@@ -96,19 +93,7 @@ LRESULT CALLBACK Win32Application::WindowProc(HWND hWnd, UINT message, WPARAM wP
         return 0;
 
     case WM_KEYDOWN:
-        if (pSample)
-        {
-            pSample->OnKeyDown(static_cast<UINT8>(wParam));
-        }
-        return 0;
-
     case WM_KEYUP:
-        if (pSample)
-        {
-            pSample->OnKeyUp(static_cast<UINT8>(wParam));
-        }
-        return 0;
-
     case WM_SYSKEYUP:
         DirectX::Keyboard::ProcessMessage(message, wParam, lParam);
         return 0;

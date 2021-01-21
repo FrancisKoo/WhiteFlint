@@ -21,9 +21,10 @@ D3D12HelloWindow::D3D12HelloWindow(UINT width, UINT height, std::wstring name) :
     m_scissorRect(0, 0, static_cast<LONG>(width), static_cast<LONG>(height)),
     m_fenceValues{},
     m_rtvDescriptorSize(0),
-    m_pVSConstantsData(nullptr)
+    m_pVSConstantsData(nullptr),
+    m_transform(std::make_shared<Transform>())
 {
-    XMStoreFloat4x4(&m_vsConstantsData.model, XMMatrixIdentity());
+    m_vsConstantsData.model = Matrix::Identity;
 }
 
 void D3D12HelloWindow::OnInit()
@@ -208,13 +209,18 @@ void D3D12HelloWindow::LoadAssets()
             {"COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
         };
 
+        // Describe the rasterizer.
+        CD3DX12_RASTERIZER_DESC rasterDesc(D3D12_DEFAULT);
+        rasterDesc.CullMode = D3D12_CULL_MODE_NONE;
+        rasterDesc.DepthClipEnable = FALSE;
+
         // Describe and create the graphics pipeline state object (PSO).
         D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc = {};
         psoDesc.InputLayout = { inputElementDescs, _countof(inputElementDescs) };
         psoDesc.pRootSignature = m_rootSignature.get();
         psoDesc.VS = CD3DX12_SHADER_BYTECODE(vertexShader.get());
         psoDesc.PS = CD3DX12_SHADER_BYTECODE(pixelShader.get());
-        psoDesc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
+        psoDesc.RasterizerState = rasterDesc;
         psoDesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
         psoDesc.DepthStencilState.DepthEnable = FALSE;
         psoDesc.DepthStencilState.StencilEnable = FALSE;
@@ -327,16 +333,35 @@ void D3D12HelloWindow::LoadAssets()
 // Update frame-based values.
 void D3D12HelloWindow::OnUpdate()
 {
-    Matrix t;
-    DirectX::Keyboard::State state = Keyboard::Get().GetState();
-    DirectX::Keyboard::KeyboardStateTracker tracker;
-    tracker.Update(state);
+	DirectX::Keyboard::State state = Keyboard::Get().GetState();
+	DirectX::Keyboard::KeyboardStateTracker tracker;
+	tracker.Update(state);
 
-    if (state.W)
-    {
-        t = Matrix::CreateTranslation(0.0f, 0.01f, 0.0f);
-    }
-    m_vsConstantsData.model *= t;
+    // Translate.
+	if (tracker.pressed.D) m_transform->position.x +=0.01f;
+    if (tracker.pressed.A) m_transform->position.x -=0.01f;
+	if (tracker.pressed.W) m_transform->position.y +=0.01f;
+	if (tracker.pressed.S) m_transform->position.y -=0.01f;
+	if (tracker.pressed.E) m_transform->position.z +=0.01f;
+	if (tracker.pressed.Q) m_transform->position.z -=0.01f;
+    // Rotate.
+    if (tracker.pressed.NumPad4)  m_transform->rotation.x += 0.1f;
+    if (tracker.pressed.NumPad6)  m_transform->rotation.x -= 0.1f;
+    if (tracker.pressed.NumPad8)  m_transform->rotation.y += 0.1f;
+    if (tracker.pressed.NumPad2)  m_transform->rotation.y -= 0.1f;
+    if (tracker.pressed.Decimal)  m_transform->rotation.z += 0.1f;
+    if (tracker.pressed.NumPad0)  m_transform->rotation.z -= 0.1f;
+    // Scale.
+    if (tracker.pressed.Right) m_transform->scale.x += 0.1f;
+    if (tracker.pressed.Left)  m_transform->scale.x -= 0.1f;
+    if (tracker.pressed.Up)    m_transform->scale.y += 0.1f;
+    if (tracker.pressed.Down)  m_transform->scale.y -= 0.1f;
+    // Reset.
+    if (tracker.pressed.Space) m_transform->Reset();
+
+    m_vsConstantsData.model = m_transform->GetModelMatrix();
+
+	memcpy(m_pVSConstantsData, &m_vsConstantsData, sizeof(m_vsConstantsData));
 }
 
 // Render the scene.
@@ -364,31 +389,9 @@ void D3D12HelloWindow::OnDestroy()
     CloseHandle(m_fenceEvent);
 }
 
-void D3D12HelloWindow::OnKeyDown(UINT8 key)
-{
-    Matrix t, r, s;
-	switch (key)
-	{
-	case VK_LEFT:
-        t = Matrix::CreateTranslation(-0.01f, 0.0f, 0.0f);
-        break;
-    case VK_RIGHT:
-        t = Matrix::CreateTranslation(0.01f, 0.0f, 0.0f);
-        break;
-    case VK_UP:
-        t = Matrix::CreateTranslation(0.0f, 0.01f, 0.0f);
-        break;
-    case VK_DOWN:
-		t = Matrix::CreateTranslation(0.0f, -0.01f, 0.0);
-		break;
-	default:
-		break;
-	}
-
-    m_vsConstantsData.model *= t * s;
-
-    memcpy(m_pVSConstantsData, &m_vsConstantsData, sizeof(m_vsConstantsData));
-}
+//void D3D12HelloWindow::OnKeyDown(UINT8 key)
+//{
+//}
 
 //void D3D12HelloWindow::OnKeyUp(UINT key)
 //{
