@@ -12,6 +12,8 @@
 #pragma once
 
 #include "DXSample.h"
+#include "Transform.h"
+
 
 using namespace DirectX;
 
@@ -36,52 +38,6 @@ public:
 
     //void OnKeyDown(UINT8 key) override;
     //void OnKeyUp(UINT key);
-
-    class Transform
-    {
-    public:
-        Transform() { Reset(); }
-
-        void Translate(float x, float y, float z)
-        {
-            position.x += x;
-            position.y += y;
-            position.z += z;
-        }
-
-        void Rotate(float x, float y, float z)
-        {
-            rotation.x += x;
-            rotation.y += y;
-            rotation.z += z;
-        }
-
-        void Scale(float x, float y, float z)
-        {
-            scale.x += x;
-            scale.y += y;
-            scale.z += z;
-        }
-
-        Matrix GetModelMatrix()
-        {
-            Matrix t, r, s;
-            t = Matrix::CreateTranslation(position);
-            r = Matrix::CreateFromYawPitchRoll(rotation.x, rotation.y, rotation.z);
-            s = Matrix::CreateScale(scale);
-            return s * r * t;
-        }
-
-        void Reset()
-        {
-            position = rotation = Vector3::Zero;
-            scale = Vector3::One;
-        }
-
-        Vector3 position;
-        Vector3 rotation;
-        Vector3 scale;
-    };
 
     // Object property.
     std::shared_ptr<Transform> m_transform;

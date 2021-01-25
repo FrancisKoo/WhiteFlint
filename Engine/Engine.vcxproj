@@ -150,6 +150,7 @@
     </ClCompile>
     <ClCompile Include="Source\Win32Application.cpp" />
     <ClCompile Include="Source\WinMain.cpp" />
+    <ClCompile Include="Source\Transform.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Camera.h" />
@@ -161,6 +162,7 @@
     <ClInclude Include="Source\resource.h" />
     <ClInclude Include="Source\WaveFrontReader.h" />
     <ClInclude Include="Source\Win32Application.h" />
+    <ClInclude Include="Source\Transform.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Source\Engine.rc" />

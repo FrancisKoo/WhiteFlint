@@ -1,12 +1,25 @@
 #pragma once
 
-using namespace DirectX;
+#include "Transform.h"
+
+using namespace DirectX::SimpleMath;
+
 class Camera
 {
 public:
-	//Camera(XMFLOAT3 position, XMFLOAT3 target);
-	XMFLOAT3 m_position;
-	XMFLOAT3 m_rotation;
+	Camera(Vector3 position, Vector3 rotation, float fov, float aspect, float near, float far);
+	//~Camera();
+	Transform m_transform;
+
+	
+	float m_fov;
+	float m_aspectRatio;
+	float m_nearPlane;
+	float m_farPlane;
+	
+	Matrix GetViewMatrix();
+	//Matrix GetProjectionMatrix();
+
 
 private:
 };
