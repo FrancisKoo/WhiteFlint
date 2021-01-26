@@ -12,7 +12,8 @@
 cbuffer VSConstants : register(b0)
 {
 	float4x4 model;
-	float4 padding[12];
+	float4x4 view;
+	float4 padding[8];
 };
 
 struct PSInput
@@ -25,7 +26,9 @@ PSInput VSMain(float4 position : POSITION, float4 color : COLOR)
 {
     PSInput result;
     
-	result.position = mul(model, position);
+
+	float4x4 mvp = mul(view, model);
+	result.position = mul(mvp, position);
 	result.color = color;
 
     return result;

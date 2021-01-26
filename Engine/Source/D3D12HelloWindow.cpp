@@ -22,7 +22,8 @@ D3D12HelloWindow::D3D12HelloWindow(UINT width, UINT height, std::wstring name) :
     m_fenceValues{},
     m_rtvDescriptorSize(0),
     m_pVSConstantsData(nullptr),
-    m_transform(std::make_shared<Transform>())
+    m_transform(std::make_shared<Transform>()),
+    m_camera(Vector3::Zero, Vector3::Zero, 90, 1, 0, 100)
 {
     m_vsConstantsData.model = Matrix::Identity;
 }
@@ -360,6 +361,7 @@ void D3D12HelloWindow::OnUpdate()
     if (tracker.pressed.Space) m_transform->Reset();
 
     m_vsConstantsData.model = m_transform->GetModelMatrix();
+    m_vsConstantsData.view = m_camera.GetViewMatrix();
 
 	memcpy(m_pVSConstantsData, &m_vsConstantsData, sizeof(m_vsConstantsData));
 }

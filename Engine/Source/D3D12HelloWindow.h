@@ -13,7 +13,7 @@
 
 #include "DXSample.h"
 #include "Transform.h"
-
+#include "Camera.h"
 
 using namespace DirectX;
 
@@ -42,6 +42,8 @@ public:
     // Object property.
     std::shared_ptr<Transform> m_transform;
 
+    Camera m_camera;
+
 private:
     // In this sample we overload the meaning of FrameCount to mean both the maximum
     // number of frames that will be queued to the GPU at a time, as well as the number
@@ -62,7 +64,8 @@ private:
     struct VSConstants
     {
         Matrix model;
-        float padding[48];
+        Matrix view;
+        float padding[32];
     };
 
 
