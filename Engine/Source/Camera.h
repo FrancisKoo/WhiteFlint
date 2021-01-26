@@ -7,7 +7,7 @@ using namespace DirectX::SimpleMath;
 class Camera
 {
 public:
-	Camera(Vector3 position, Vector3 rotation, float fov, float aspect, float near, float far);
+	Camera(Vector3 position, Vector3 rotation, float fov, float aspect, float nearZ, float farZ);
 	//~Camera();
 	Transform m_transform;
 
@@ -18,7 +18,7 @@ public:
 	float m_farPlane;
 	
 	Matrix GetViewMatrix();
-	//Matrix GetProjectionMatrix();
+	Matrix GetProjectionMatrix();
 
 
 private:

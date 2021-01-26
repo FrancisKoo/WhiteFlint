@@ -22,6 +22,7 @@ public:
     static HWND GetHwnd() { return m_hwnd; }
 
     static std::unique_ptr<DirectX::Keyboard> m_keyboard;
+    static std::unique_ptr<DirectX::Mouse> m_mouse;
 
 protected:
     static LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);

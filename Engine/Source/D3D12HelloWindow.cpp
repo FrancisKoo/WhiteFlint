@@ -12,7 +12,7 @@
 #include "pch.h"
 #include "D3D12HelloWindow.h"
 
-#include "WaveFrontReader.h"
+//#include "WaveFrontReader.h"
 
 D3D12HelloWindow::D3D12HelloWindow(UINT width, UINT height, std::wstring name) :
     DXSample(width, height, name),
@@ -23,9 +23,11 @@ D3D12HelloWindow::D3D12HelloWindow(UINT width, UINT height, std::wstring name) :
     m_rtvDescriptorSize(0),
     m_pVSConstantsData(nullptr),
     m_transform(std::make_shared<Transform>()),
-    m_camera(Vector3::Zero, Vector3::Zero, 90, 1, 0, 100)
+    m_camera(Vector3::Forward * 2.0f, Vector3::Zero, 65.0f, m_aspectRatio, 0.1f, 10.0f)
 {
     m_vsConstantsData.model = Matrix::Identity;
+    m_vsConstantsData.view = Matrix::Identity;
+    m_vsConstantsData.projection = Matrix::Identity;
 }
 
 void D3D12HelloWindow::OnInit()
@@ -334,34 +336,67 @@ void D3D12HelloWindow::LoadAssets()
 // Update frame-based values.
 void D3D12HelloWindow::OnUpdate()
 {
-	DirectX::Keyboard::State state = Keyboard::Get().GetState();
-	DirectX::Keyboard::KeyboardStateTracker tracker;
-	tracker.Update(state);
+	DirectX::Keyboard::State ks = Keyboard::Get().GetState();
+	DirectX::Keyboard::KeyboardStateTracker kt;
+	kt.Update(ks);
+
+    DirectX::Mouse::State ms = Mouse::Get().GetState();
+    DirectX::Mouse::ButtonStateTracker mt;
+    mt.Update(ms);
 
     // Translate.
-	if (tracker.pressed.D) m_transform->position.x +=0.01f;
-    if (tracker.pressed.A) m_transform->position.x -=0.01f;
-	if (tracker.pressed.W) m_transform->position.y +=0.01f;
-	if (tracker.pressed.S) m_transform->position.y -=0.01f;
-	if (tracker.pressed.E) m_transform->position.z +=0.01f;
-	if (tracker.pressed.Q) m_transform->position.z -=0.01f;
+	if (kt.pressed.D) m_camera.m_transform.position.x +=0.01f;
+    if (kt.pressed.A) m_camera.m_transform.position.x -=0.01f;
+	if (kt.pressed.E) m_camera.m_transform.position.y +=0.01f;
+	if (kt.pressed.Q) m_camera.m_transform.position.y -=0.01f;
+	if (kt.pressed.W) m_camera.m_transform.position.z +=0.01f;
+	if (kt.pressed.S) m_camera.m_transform.position.z -=0.01f;
     // Rotate.
-    if (tracker.pressed.NumPad4)  m_transform->rotation.x += 0.1f;
-    if (tracker.pressed.NumPad6)  m_transform->rotation.x -= 0.1f;
-    if (tracker.pressed.NumPad8)  m_transform->rotation.y += 0.1f;
-    if (tracker.pressed.NumPad2)  m_transform->rotation.y -= 0.1f;
-    if (tracker.pressed.Decimal)  m_transform->rotation.z += 0.1f;
-    if (tracker.pressed.NumPad0)  m_transform->rotation.z -= 0.1f;
+	if (ms.positionMode == DirectX::Mouse::MODE_RELATIVE)
+	{
+        float pitch = m_camera.m_transform.rotation.x;
+        float yaw = m_camera.m_transform.rotation.y;
+
+		yaw   += ms.x * 0.005f;
+		pitch += ms.y * 0.005f;
+
+        // limit pitch to straight up or straight down
+        // with a little fudge-factor to avoid gimbal lock
+        float limit = XM_PI / 2.0f - 0.01f;
+        pitch = std::max<float>(-limit, pitch);
+        pitch = std::min<float>(+limit, pitch);
+        // keep longitude in sane range by wrapping
+        if (yaw > XM_PI)
+        {
+            yaw -= XM_PI * 2.0f;
+        }
+        else if (yaw < -XM_PI)
+        {
+            yaw += XM_PI * 2.0f;
+        }
+
+        m_camera.m_transform.rotation.x = pitch;
+        m_camera.m_transform.rotation.y = yaw;
+	}
+    Mouse::Get().SetMode(ms.rightButton ? Mouse::MODE_RELATIVE : Mouse::MODE_ABSOLUTE);
+
+    //if (kt.pressed.NumPad4)  m_transform->rotation.x += 0.1f;
+    //if (kt.pressed.NumPad6)  m_transform->rotation.x -= 0.1f;
+    //if (kt.pressed.NumPad8)  m_transform->rotation.y += 0.1f;
+    //if (kt.pressed.NumPad2)  m_transform->rotation.y -= 0.1f;
+    //if (kt.pressed.Add)      m_transform->rotation.z += 0.1f;
+    //if (kt.pressed.Subtract) m_transform->rotation.z -= 0.1f;
     // Scale.
-    if (tracker.pressed.Right) m_transform->scale.x += 0.1f;
-    if (tracker.pressed.Left)  m_transform->scale.x -= 0.1f;
-    if (tracker.pressed.Up)    m_transform->scale.y += 0.1f;
-    if (tracker.pressed.Down)  m_transform->scale.y -= 0.1f;
+    if (kt.pressed.Right) m_transform->scale.x += 0.1f;
+    if (kt.pressed.Left)  m_transform->scale.x -= 0.1f;
+    if (kt.pressed.Up)    m_transform->scale.y += 0.1f;
+    if (kt.pressed.Down)  m_transform->scale.y -= 0.1f;
     // Reset.
-    if (tracker.pressed.Space) m_transform->Reset();
+    if (kt.pressed.Space) m_transform->Reset();
 
     m_vsConstantsData.model = m_transform->GetModelMatrix();
     m_vsConstantsData.view = m_camera.GetViewMatrix();
+    m_vsConstantsData.projection = m_camera.GetProjectionMatrix();
 
 	memcpy(m_pVSConstantsData, &m_vsConstantsData, sizeof(m_vsConstantsData));
 }

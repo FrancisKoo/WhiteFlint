@@ -14,6 +14,7 @@
 
 HWND Win32Application::m_hwnd = nullptr;
 std::unique_ptr<DirectX::Keyboard> Win32Application::m_keyboard = std::make_unique<DirectX::Keyboard>();
+std::unique_ptr<DirectX::Mouse> Win32Application::m_mouse = std::make_unique<DirectX::Mouse>();
 
 int Win32Application::Run(DXSample* pSample, HINSTANCE hInstance, int nCmdShow)
 {
@@ -49,6 +50,9 @@ int Win32Application::Run(DXSample* pSample, HINSTANCE hInstance, int nCmdShow)
         nullptr,        // We aren't using menus.
         hInstance,
         pSample);
+
+    // Initialize the mosue.
+    m_mouse->SetWindow(m_hwnd);
 
     // Initialize the sample. OnInit is defined in each child-implementation of DXSample.
     pSample->OnInit();
@@ -90,6 +94,22 @@ LRESULT CALLBACK Win32Application::WindowProc(HWND hWnd, UINT message, WPARAM wP
 
     case WM_ACTIVATEAPP:
         DirectX::Keyboard::ProcessMessage(message, wParam, lParam);
+        DirectX::Mouse::ProcessMessage(message, wParam, lParam);
+        return 0;
+
+    case WM_INPUT:
+    case WM_MOUSEMOVE:
+    case WM_LBUTTONDOWN:
+    case WM_LBUTTONUP:
+    case WM_RBUTTONDOWN:
+    case WM_RBUTTONUP:
+    case WM_MBUTTONDOWN:
+    case WM_MBUTTONUP:
+    case WM_MOUSEWHEEL:
+    case WM_XBUTTONDOWN:
+    case WM_XBUTTONUP:
+    case WM_MOUSEHOVER:
+        DirectX::Mouse::ProcessMessage(message, wParam, lParam);
         return 0;
 
     case WM_KEYDOWN:

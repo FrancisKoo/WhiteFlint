@@ -65,7 +65,8 @@ private:
     {
         Matrix model;
         Matrix view;
-        float padding[32];
+        Matrix projection;
+        float padding[16];
     };
 
 

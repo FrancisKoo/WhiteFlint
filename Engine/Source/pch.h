@@ -8,6 +8,7 @@
 #include <d3d12.h>
 #include <dxgi1_6.h>
 #include <D3Dcompiler.h>
+#include <DirectXTK12/Mouse.h>
 #include <DirectXTK12/Keyboard.h>
 #include <DirectXTK12/SimpleMath.h>
 #include "d3dx12.h"

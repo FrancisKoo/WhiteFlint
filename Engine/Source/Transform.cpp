@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "Transform.h"
 
-Transform::Transform(Vector3 pos/*= Vector3::Zero*/, Vector3 rot /*= Vector3::Zero*/, Vector3 scl /*= Vector3::One*/) :
+Transform::Transform(Vector3 pos /*= Vector3::Zero*/, Vector3 rot /*= Vector3::Zero*/, Vector3 scl /*= Vector3::One*/) :
 	position(pos),
 	rotation(rot),
 	scale(scl)
@@ -33,7 +33,7 @@ DirectX::SimpleMath::Matrix Transform::GetModelMatrix()
 {
 	Matrix t, r, s;
 	t = Matrix::CreateTranslation(position);
-	r = Matrix::CreateFromYawPitchRoll(rotation.x, rotation.y, rotation.z);
+	r = Matrix::CreateFromYawPitchRoll(rotation.y, rotation.x, rotation.z);
 	s = Matrix::CreateScale(scale);
 	return s * r * t;
 }
