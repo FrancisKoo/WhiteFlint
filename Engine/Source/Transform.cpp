@@ -29,6 +29,54 @@ void Transform::Scale(float x, float y, float z)
 	scale.z += z;
 }
 
+DirectX::SimpleMath::Vector3 Transform::GetForwardDirection()
+{
+	Vector3 front(0, 0, 1);
+
+	Vector3 euler = rotation;
+	float pitch = euler.x;
+	float yaw = euler.y;
+	//float roll  = euler.z;
+
+	front.x = DirectX::XMScalarSin(yaw) * DirectX::XMScalarCos(pitch);
+	front.y = DirectX::XMScalarSin(pitch);
+	front.z = DirectX::XMScalarCos(yaw) * DirectX::XMScalarCos(pitch);
+
+	front.Normalize();
+
+	return front;
+}
+
+DirectX::SimpleMath::Vector3 Transform::GetRightDirection()
+{
+	Vector3 right = Vector3(0, 1, 0).Cross(GetForwardDirection());
+	right.Normalize();
+	return right;
+}
+
+DirectX::SimpleMath::Vector3 Transform::GetUpDirection()
+{
+	Vector3 right = Vector3(0, 1, 0).Cross(GetForwardDirection());
+	Vector3 up = GetForwardDirection().Cross(right);
+	up.Normalize();
+	return up;
+}
+
+void Transform::MoveForward(float z)
+{
+	position += GetForwardDirection() * z;
+}
+
+void Transform::MoveRight(float x)
+{
+	position += GetRightDirection() * x;
+}
+
+void Transform::MoveUp(float y)
+{
+	position += GetUpDirection() * y;
+}
+
 DirectX::SimpleMath::Matrix Transform::GetModelMatrix()
 {
 	Matrix t, r, s;

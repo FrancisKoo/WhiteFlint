@@ -345,12 +345,12 @@ void D3D12HelloWindow::OnUpdate()
     mt.Update(ms);
 
     // Translate.
-	if (kt.pressed.D) m_camera.m_transform.position.x +=0.01f;
-    if (kt.pressed.A) m_camera.m_transform.position.x -=0.01f;
-	if (kt.pressed.E) m_camera.m_transform.position.y +=0.01f;
-	if (kt.pressed.Q) m_camera.m_transform.position.y -=0.01f;
-	if (kt.pressed.W) m_camera.m_transform.position.z +=0.01f;
-	if (kt.pressed.S) m_camera.m_transform.position.z -=0.01f;
+	if (kt.pressed.D) m_camera.m_transform.MoveRight(0.01f);
+    if (kt.pressed.A) m_camera.m_transform.MoveRight(-0.01f);
+	if (kt.pressed.E) m_camera.m_transform.MoveUp(0.01f);
+	if (kt.pressed.Q) m_camera.m_transform.MoveUp(-0.01f);
+	if (kt.pressed.W) m_camera.m_transform.MoveForward(0.01f);
+	if (kt.pressed.S) m_camera.m_transform.MoveForward(-0.01f);
     // Rotate.
 	if (ms.positionMode == DirectX::Mouse::MODE_RELATIVE)
 	{
@@ -358,7 +358,7 @@ void D3D12HelloWindow::OnUpdate()
         float yaw = m_camera.m_transform.rotation.y;
 
 		yaw   += ms.x * 0.005f;
-		pitch += ms.y * 0.005f;
+		pitch -= ms.y * 0.005f;
 
         // limit pitch to straight up or straight down
         // with a little fudge-factor to avoid gimbal lock
