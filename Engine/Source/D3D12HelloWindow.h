@@ -55,11 +55,11 @@ private:
     // may result in noticeable latency in your app.
     static const UINT FrameCount = 2;
 
-    struct Vertex
-    {
-        Vector3 position;
-        Vector4 color;
-    };
+    //struct Vertex
+    //{
+    //    Vector3 position;
+    //    Vector4 color;
+    //};
 
     struct VSConstants
     {
@@ -80,6 +80,7 @@ private:
     com_ptr<ID3D12CommandQueue> m_commandQueue;
     com_ptr<ID3D12RootSignature> m_rootSignature;
     com_ptr<ID3D12DescriptorHeap> m_rtvHeap;
+    com_ptr<ID3D12DescriptorHeap> m_dsvHeap;
     com_ptr<ID3D12PipelineState> m_pipelineState;
     com_ptr<ID3D12GraphicsCommandList> m_commandList;
     UINT m_rtvDescriptorSize;
@@ -88,11 +89,16 @@ private:
     com_ptr<ID3D12Resource> m_vertexBuffer;
     D3D12_VERTEX_BUFFER_VIEW m_vertexBufferView;
 
+    com_ptr<ID3D12Resource> m_indexBuffer;
+    D3D12_INDEX_BUFFER_VIEW m_indexBufferView;
+
     // Vertex shader constants.
     com_ptr<ID3D12Resource> m_vsConstantsBuffer;
     VSConstants m_vsConstantsData;
     com_ptr<ID3D12DescriptorHeap> m_cbvHeap;
     UINT8* m_pVSConstantsData;
+
+	com_ptr<ID3D12Resource> m_depthStencil;
 
     // Synchronization objects.
     UINT m_frameIndex;

@@ -17,26 +17,36 @@ cbuffer VSConstants : register(b0)
 	float4 padding[4];
 };
 
-struct PSInput
+struct VSInput
 {
-    float4 position : SV_POSITION;
-    float4 color : COLOR;
+	float4 position : POSITION;
+	float3 normal : NORMAL;
+	float2 texcoord : TEXCOORD;
 };
 
-PSInput VSMain(float4 position : POSITION, float4 color : COLOR)
+struct PSInput
+{
+	float4 position : SV_Position;
+    float3 normal : TEXCOORD0;
+	float2 uv : TEXCOORD1;
+};
+
+PSInput VSMain(VSInput input)
 {
     PSInput result;
-    
 
 	float4x4 mvp = mul(projection, mul(view, model));
-	result.position = mul(mvp, position);
-	result.color = color;
+	result.position = mul(mvp, input.position);
+	result.normal = input.normal;
+	result.uv = input.texcoord;
 
     return result;
 }
 
 float4 PSMain(PSInput input, bool bFront : SV_IsFrontFace) : SV_TARGET
 {
-	float4 result = bFront ? input.color : float4(0, 0, 0, 1);
+	float4 result = 1;
+	result.rg = bFront ? input.uv.xy : 0;
+	
 	return result;
 }
