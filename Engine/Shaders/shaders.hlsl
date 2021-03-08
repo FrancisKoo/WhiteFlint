@@ -12,22 +12,22 @@
 cbuffer VSConstants : register(b0)
 {
 	float4x4 model;
+	float4x4 inverseOfModel;
 	float4x4 view;
 	float4x4 projection;
-	float4 padding[4];
 };
 
 struct VSInput
 {
-	float4 position : POSITION;
-	float3 normal : NORMAL;
-	float2 texcoord : TEXCOORD;
+	float3 positionOS : POSITION;
+	float3 normalOS : NORMAL;
+	float2 texcoord0 : TEXCOORD0;
 };
 
 struct PSInput
 {
-	float4 position : SV_Position;
-    float3 normal : TEXCOORD0;
+	float4 positionCS : SV_Position;
+    float3 normalWS : TEXCOORD0;
 	float2 uv : TEXCOORD1;
 };
 
@@ -36,17 +36,24 @@ PSInput VSMain(VSInput input)
     PSInput result;
 
 	float4x4 mvp = mul(projection, mul(view, model));
-	result.position = mul(mvp, input.position);
-	result.normal = input.normal;
-	result.uv = input.texcoord;
+	result.positionCS = mul(mvp, float4(input.positionOS * 10.0f, 1.0f));
+	
+	// Normal multiply inverse transpose of model matrix.
+	result.normalWS = mul(input.normalOS, (float3x3)inverseOfModel);
+	result.uv = input.texcoord0;
 
     return result;
 }
 
-float4 PSMain(PSInput input, bool bFront : SV_IsFrontFace) : SV_TARGET
+float4 PSMain(PSInput input, bool bFront : SV_IsFrontFace) : SV_Target
 {
-	float4 result = 1;
-	result.rg = bFront ? input.uv.xy : 0;
+	float4 result = 1.0f;
+	
+	/*******************************Debug.*******************************/
+	// World normal.
+	result.xyz = input.normalWS;
+	// Normal interpolate exaggerate error check.
+	//result.xyz = abs(length(input.normalWS) - 1.0f) * 10.0f;
 	
 	return result;
 }

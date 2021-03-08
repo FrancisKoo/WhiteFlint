@@ -64,9 +64,9 @@ private:
     struct VSConstants
     {
         Matrix model;
+        Matrix inverseOfModel;
         Matrix view;
         Matrix projection;
-        float padding[16];
     };
 
 

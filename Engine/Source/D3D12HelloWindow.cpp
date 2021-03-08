@@ -26,6 +26,7 @@ D3D12HelloWindow::D3D12HelloWindow(UINT width, UINT height, std::wstring name) :
     m_camera(Vector3::Forward * 2.0f, Vector3::Zero, 65.0f, m_aspectRatio, 0.1f, 10.0f)
 {
     m_vsConstantsData.model = Matrix::Identity;
+    m_vsConstantsData.inverseOfModel = Matrix::Identity;
     m_vsConstantsData.view = Matrix::Identity;
     m_vsConstantsData.projection = Matrix::Identity;
 }
@@ -126,8 +127,8 @@ void D3D12HelloWindow::LoadPipeline()
     
 		// Describe and create a depth stencil view (DSV) descriptor heap.
 		D3D12_DESCRIPTOR_HEAP_DESC dsvHeapDesc = {};
-        dsvHeapDesc.NumDescriptors = FrameCount;
-        dsvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
+        dsvHeapDesc.NumDescriptors = 1;
+        dsvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
         dsvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 		ThrowIfFailed(m_device->CreateDescriptorHeap(&dsvHeapDesc, IID_PPV_ARGS(&m_dsvHeap)));
 
@@ -223,7 +224,7 @@ void D3D12HelloWindow::LoadAssets()
         // Describe the rasterizer.
         CD3DX12_RASTERIZER_DESC rasterDesc(D3D12_DEFAULT);
         rasterDesc.CullMode = D3D12_CULL_MODE_NONE;
-        //rasterDesc.DepthClipEnable = FALSE;
+        rasterDesc.DepthClipEnable = FALSE;
 
         // Describe and create the graphics pipeline state object (PSO).
         D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc = {};
@@ -255,7 +256,7 @@ void D3D12HelloWindow::LoadAssets()
         // Load mesh file.
         {
             WaveFrontReader<uint32_t> objReader;
-            ThrowIfFailed(objReader.Load(GetAssetFullPath(L"Models/Cube.obj").c_str()));
+            ThrowIfFailed(objReader.Load(GetAssetFullPath(L"Models/bunny.obj").c_str()));
         
 
             WaveFrontReader<uint32_t>::Vertex* meshVertices = &objReader.vertices[0];
@@ -476,12 +477,12 @@ void D3D12HelloWindow::OnUpdate()
 	}
     Mouse::Get().SetMode(ms.rightButton ? Mouse::MODE_RELATIVE : Mouse::MODE_ABSOLUTE);
 
-    //if (kt.pressed.NumPad4)  m_transform->rotation.x += 0.1f;
-    //if (kt.pressed.NumPad6)  m_transform->rotation.x -= 0.1f;
-    //if (kt.pressed.NumPad8)  m_transform->rotation.y += 0.1f;
-    //if (kt.pressed.NumPad2)  m_transform->rotation.y -= 0.1f;
-    //if (kt.pressed.Add)      m_transform->rotation.z += 0.1f;
-    //if (kt.pressed.Subtract) m_transform->rotation.z -= 0.1f;
+    if (kt.pressed.NumPad4)  m_transform->rotation.x += 0.1f;
+    if (kt.pressed.NumPad6)  m_transform->rotation.x -= 0.1f;
+    if (kt.pressed.NumPad8)  m_transform->rotation.y += 0.1f;
+    if (kt.pressed.NumPad2)  m_transform->rotation.y -= 0.1f;
+    if (kt.pressed.Add)      m_transform->rotation.z += 0.1f;
+    if (kt.pressed.Subtract) m_transform->rotation.z -= 0.1f;
     // Scale.
     if (kt.pressed.Right) m_transform->scale.x += 0.1f;
     if (kt.pressed.Left)  m_transform->scale.x -= 0.1f;
@@ -491,6 +492,7 @@ void D3D12HelloWindow::OnUpdate()
     if (kt.pressed.Space) m_transform->Reset();
 
     m_vsConstantsData.model = m_transform->GetModelMatrix();
+    m_vsConstantsData.inverseOfModel = m_transform->GetModelMatrix().Invert();
     m_vsConstantsData.view = m_camera.GetViewMatrix();
     m_vsConstantsData.projection = m_camera.GetProjectionMatrix();
 
@@ -568,7 +570,7 @@ void D3D12HelloWindow::PopulateCommandList()
     m_commandList->IASetIndexBuffer(&m_indexBufferView);
     m_commandList->IASetVertexBuffers(0, 1, &m_vertexBufferView);
     //m_commandList->DrawInstanced(24, 1, 0, 0);
-    m_commandList->DrawIndexedInstanced(36, 1, 0, 0, 0);
+    m_commandList->DrawIndexedInstanced(14904, 1, 0, 0, 0);
 
     // Indicate that the back buffer will now be used to present.
     barrier = CD3DX12_RESOURCE_BARRIER::Transition(m_renderTargets[m_frameIndex].get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
