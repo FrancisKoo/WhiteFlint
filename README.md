@@ -1,4 +1,4 @@
 # WhiteFlint
 A dx12 engine using c++/winrt
 
-Using left-handed and Y-axis up coordinate.
+Using left-handed and Y-axis up coordinate，column-major ordering matrix.
