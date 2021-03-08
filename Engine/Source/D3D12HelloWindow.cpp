@@ -12,7 +12,7 @@
 #include "pch.h"
 #include "D3D12HelloWindow.h"
 
-//#include "WaveFrontReader.h"
+#include "WaveFrontReader.h"
 
 D3D12HelloWindow::D3D12HelloWindow(UINT width, UINT height, std::wstring name) :
     DXSample(width, height, name),
@@ -26,6 +26,7 @@ D3D12HelloWindow::D3D12HelloWindow(UINT width, UINT height, std::wstring name) :
     m_camera(Vector3::Forward * 2.0f, Vector3::Zero, 65.0f, m_aspectRatio, 0.1f, 10.0f)
 {
     m_vsConstantsData.model = Matrix::Identity;
+    m_vsConstantsData.inverseOfModel = Matrix::Identity;
     m_vsConstantsData.view = Matrix::Identity;
     m_vsConstantsData.projection = Matrix::Identity;
 }
@@ -124,6 +125,13 @@ void D3D12HelloWindow::LoadPipeline()
         rtvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
         ThrowIfFailed(m_device->CreateDescriptorHeap(&rtvHeapDesc, IID_PPV_ARGS(&m_rtvHeap)));
     
+		// Describe and create a depth stencil view (DSV) descriptor heap.
+		D3D12_DESCRIPTOR_HEAP_DESC dsvHeapDesc = {};
+        dsvHeapDesc.NumDescriptors = 1;
+        dsvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
+        dsvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
+		ThrowIfFailed(m_device->CreateDescriptorHeap(&dsvHeapDesc, IID_PPV_ARGS(&m_dsvHeap)));
+
         m_rtvDescriptorSize = m_device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
     
         // Describe and create a constant buffer view (CBV) descriptor heap.
@@ -209,7 +217,8 @@ void D3D12HelloWindow::LoadAssets()
         D3D12_INPUT_ELEMENT_DESC inputElementDescs[] =
         {
             {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-            {"COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
+            {"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+            {"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 24, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
         };
 
         // Describe the rasterizer.
@@ -225,12 +234,12 @@ void D3D12HelloWindow::LoadAssets()
         psoDesc.PS = CD3DX12_SHADER_BYTECODE(pixelShader.get());
         psoDesc.RasterizerState = rasterDesc;
         psoDesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
-        psoDesc.DepthStencilState.DepthEnable = FALSE;
-        psoDesc.DepthStencilState.StencilEnable = FALSE;
+        psoDesc.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
         psoDesc.SampleMask = UINT_MAX;
         psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
         psoDesc.NumRenderTargets = 1;
         psoDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
+        psoDesc.DSVFormat = DXGI_FORMAT_D32_FLOAT;
         psoDesc.SampleDesc.Count = 1;
         ThrowIfFailed(m_device->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&m_pipelineState)));
     }
@@ -244,47 +253,98 @@ void D3D12HelloWindow::LoadAssets()
 
     // Create the vertex buffer.
     {
-        //// Load mesh file.
-        //{
-        //    WaveFrontReader<uint32_t> objReader;
-        //    ThrowIfFailed(objReader.Load(GetAssetFullPath(L"Cube.obj").c_str()));
-        //}
-
-        // Define the geometry for a triangle.
-        Vertex triangleVertices[] =
+        // Load mesh file.
         {
-            { { 0.0f, 0.25f * m_aspectRatio, 0.0f }, { 1.0f, 0.0f, 0.0f, 1.0f } },
-            { { 0.25f, -0.25f * m_aspectRatio, 0.0f }, { 0.0f, 1.0f, 0.0f, 1.0f } },
-            { { -0.25f, -0.25f * m_aspectRatio, 0.0f }, { 0.0f, 0.0f, 1.0f, 1.0f } }
-        };
+            WaveFrontReader<uint32_t> objReader;
+            ThrowIfFailed(objReader.Load(GetAssetFullPath(L"Models/bunny.obj").c_str()));
+        
 
-        const UINT vertexBufferSize = sizeof(triangleVertices);
+            WaveFrontReader<uint32_t>::Vertex* meshVertices = &objReader.vertices[0];
+            const UINT meshBufferSize = static_cast<UINT>(sizeof(objReader.vertices[0]) * objReader.vertices.size());
 
-        // Note: using upload heaps to transfer static data like vert buffers is not 
-        // recommended. Every time the GPU needs it, the upload heap will be marshalled 
-        // over. Please read up on Default Heap usage. An upload heap is used here for 
-        // code simplicity and because there are very few verts to actually transfer.
-        auto heapProperties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
-        auto resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(vertexBufferSize);
-        ThrowIfFailed(m_device->CreateCommittedResource(
-            &heapProperties,
-            D3D12_HEAP_FLAG_NONE,
-            &resourceDesc,
-            D3D12_RESOURCE_STATE_GENERIC_READ,
-            nullptr,
-            IID_PPV_ARGS(&m_vertexBuffer)));
+			auto heapProperties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
+			auto resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(meshBufferSize);
+			ThrowIfFailed(m_device->CreateCommittedResource(
+				&heapProperties,
+				D3D12_HEAP_FLAG_NONE,
+				&resourceDesc,
+				D3D12_RESOURCE_STATE_GENERIC_READ,
+				nullptr,
+				IID_PPV_ARGS(&m_vertexBuffer)));
 
-        // Copy the triangle data to the vertex buffer.
-        UINT8* pVertexDataBegin;
-        CD3DX12_RANGE readRange(0, 0);        // We do not intend to read from this resource on this CPU.
-        ThrowIfFailed(m_vertexBuffer->Map(0, &readRange, reinterpret_cast<void**>(&pVertexDataBegin)));
-        memcpy(pVertexDataBegin, triangleVertices, sizeof(triangleVertices));
-        m_vertexBuffer->Unmap(0, nullptr);
+			// Copy the triangle data to the vertex buffer.
+			UINT8* pVertexDataBegin;
+			CD3DX12_RANGE readRange(0, 0);        // We do not intend to read from this resource on this CPU.
+			ThrowIfFailed(m_vertexBuffer->Map(0, &readRange, reinterpret_cast<void**>(&pVertexDataBegin)));
+			memcpy(pVertexDataBegin, meshVertices, meshBufferSize);
+			m_vertexBuffer->Unmap(0, nullptr);
 
-        // Initialize the vertex buffer view;
-        m_vertexBufferView.BufferLocation = m_vertexBuffer->GetGPUVirtualAddress();
-        m_vertexBufferView.StrideInBytes = sizeof(Vertex);
-        m_vertexBufferView.SizeInBytes = vertexBufferSize;
+			// Initialize the vertex buffer view;
+			m_vertexBufferView.BufferLocation = m_vertexBuffer->GetGPUVirtualAddress();
+			m_vertexBufferView.StrideInBytes = sizeof(WaveFrontReader<uint32_t>::Vertex);
+			m_vertexBufferView.SizeInBytes = meshBufferSize;
+            
+
+			uint32_t* meshIndices = &objReader.indices[0];
+			const UINT meshIndexBufferSize = static_cast<UINT>(sizeof(uint32_t) * objReader.indices.size());
+
+			heapProperties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
+			resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(meshIndexBufferSize);
+			ThrowIfFailed(m_device->CreateCommittedResource(
+				&heapProperties,
+				D3D12_HEAP_FLAG_NONE,
+				&resourceDesc,
+				D3D12_RESOURCE_STATE_GENERIC_READ,
+				nullptr,
+				IID_PPV_ARGS(&m_indexBuffer)));
+
+			// Copy the triangle data to the vertex buffer.
+			UINT8* pIndexDataBegin;
+			ThrowIfFailed(m_indexBuffer->Map(0, &readRange, reinterpret_cast<void**>(&pIndexDataBegin)));
+			memcpy(pIndexDataBegin, meshIndices, meshIndexBufferSize);
+            m_indexBuffer->Unmap(0, nullptr);
+            
+            // Initialize the index buffer view;
+            m_indexBufferView.BufferLocation = m_indexBuffer->GetGPUVirtualAddress();
+            m_indexBufferView.SizeInBytes = meshIndexBufferSize;
+            m_indexBufferView.Format = DXGI_FORMAT_R32_UINT;
+        }
+
+        //// Define the geometry for a triangle.
+        //Vertex triangleVertices[] =
+        //{
+        //    { { 0.0f, 0.25f * m_aspectRatio, 0.0f }, { 1.0f, 0.0f, 0.0f, 1.0f } },
+        //    { { 0.25f, -0.25f * m_aspectRatio, 0.0f }, { 0.0f, 1.0f, 0.0f, 1.0f } },
+        //    { { -0.25f, -0.25f * m_aspectRatio, 0.0f }, { 0.0f, 0.0f, 1.0f, 1.0f } }
+        //};
+
+        //const UINT vertexBufferSize = sizeof(triangleVertices);
+
+        //// Note: using upload heaps to transfer static data like vert buffers is not 
+        //// recommended. Every time the GPU needs it, the upload heap will be marshalled 
+        //// over. Please read up on Default Heap usage. An upload heap is used here for 
+        //// code simplicity and because there are very few verts to actually transfer.
+        //auto heapProperties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
+        //auto resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(vertexBufferSize);
+        //ThrowIfFailed(m_device->CreateCommittedResource(
+        //    &heapProperties,
+        //    D3D12_HEAP_FLAG_NONE,
+        //    &resourceDesc,
+        //    D3D12_RESOURCE_STATE_GENERIC_READ,
+        //    nullptr,
+        //    IID_PPV_ARGS(&m_vertexBuffer)));
+
+        //// Copy the triangle data to the vertex buffer.
+        //UINT8* pVertexDataBegin;
+        //CD3DX12_RANGE readRange(0, 0);        // We do not intend to read from this resource on this CPU.
+        //ThrowIfFailed(m_vertexBuffer->Map(0, &readRange, reinterpret_cast<void**>(&pVertexDataBegin)));
+        //memcpy(pVertexDataBegin, triangleVertices, vertexBufferSize);
+        //m_vertexBuffer->Unmap(0, nullptr);
+
+        //// Initialize the vertex buffer view;
+        //m_vertexBufferView.BufferLocation = m_vertexBuffer->GetGPUVirtualAddress();
+        //m_vertexBufferView.StrideInBytes = sizeof(Vertex);
+        //m_vertexBufferView.SizeInBytes = vertexBufferSize;
     }
 
     // Create the constant buffer.
@@ -313,6 +373,43 @@ void D3D12HelloWindow::LoadAssets()
         ThrowIfFailed(m_vsConstantsBuffer->Map(0, &readRange, reinterpret_cast<void**>(&m_pVSConstantsData)));
         memcpy(m_pVSConstantsData, &m_vsConstantsData, sizeof(m_vsConstantsData));
     }
+
+    // Create the depth stecil view.
+    {
+        D3D12_DEPTH_STENCIL_VIEW_DESC depthStencilDesc = {};
+        depthStencilDesc.Format = DXGI_FORMAT_D32_FLOAT;
+        depthStencilDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
+        depthStencilDesc.Flags = D3D12_DSV_FLAG_NONE;
+
+        D3D12_CLEAR_VALUE depthOptimizedClearValue = {};
+        depthOptimizedClearValue.Format = DXGI_FORMAT_D32_FLOAT;
+        depthOptimizedClearValue.DepthStencil.Depth = 1.0f;
+        depthOptimizedClearValue.DepthStencil.Stencil = 0;
+
+		auto heapProperties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
+        auto resourceDesc = CD3DX12_RESOURCE_DESC::Tex2D(
+            DXGI_FORMAT_D32_FLOAT,
+            m_width,
+            m_height,
+            1, 0, 1, 0,
+            D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL
+        );
+
+        ThrowIfFailed(m_device->CreateCommittedResource(
+            &heapProperties,
+            D3D12_HEAP_FLAG_NONE,
+            &resourceDesc,
+            D3D12_RESOURCE_STATE_DEPTH_WRITE,
+            &depthOptimizedClearValue,
+            IID_PPV_ARGS(&m_depthStencil)
+        ));
+
+        m_device->CreateDepthStencilView(m_depthStencil.get(), &depthStencilDesc, m_dsvHeap->GetCPUDescriptorHandleForHeapStart());
+    }
+
+ //   ThrowIfFailed(m_commandList->Close());
+	//ID3D12CommandList* ppCommandLists[] = { m_commandList.get() };
+	//m_commandQueue->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
 
     // Create synchronization objects.
     {
@@ -380,12 +477,12 @@ void D3D12HelloWindow::OnUpdate()
 	}
     Mouse::Get().SetMode(ms.rightButton ? Mouse::MODE_RELATIVE : Mouse::MODE_ABSOLUTE);
 
-    //if (kt.pressed.NumPad4)  m_transform->rotation.x += 0.1f;
-    //if (kt.pressed.NumPad6)  m_transform->rotation.x -= 0.1f;
-    //if (kt.pressed.NumPad8)  m_transform->rotation.y += 0.1f;
-    //if (kt.pressed.NumPad2)  m_transform->rotation.y -= 0.1f;
-    //if (kt.pressed.Add)      m_transform->rotation.z += 0.1f;
-    //if (kt.pressed.Subtract) m_transform->rotation.z -= 0.1f;
+    if (kt.pressed.NumPad4)  m_transform->rotation.x += 0.1f;
+    if (kt.pressed.NumPad6)  m_transform->rotation.x -= 0.1f;
+    if (kt.pressed.NumPad8)  m_transform->rotation.y += 0.1f;
+    if (kt.pressed.NumPad2)  m_transform->rotation.y -= 0.1f;
+    if (kt.pressed.Add)      m_transform->rotation.z += 0.1f;
+    if (kt.pressed.Subtract) m_transform->rotation.z -= 0.1f;
     // Scale.
     if (kt.pressed.Right) m_transform->scale.x += 0.1f;
     if (kt.pressed.Left)  m_transform->scale.x -= 0.1f;
@@ -395,6 +492,7 @@ void D3D12HelloWindow::OnUpdate()
     if (kt.pressed.Space) m_transform->Reset();
 
     m_vsConstantsData.model = m_transform->GetModelMatrix();
+    m_vsConstantsData.inverseOfModel = m_transform->GetModelMatrix().Invert();
     m_vsConstantsData.view = m_camera.GetViewMatrix();
     m_vsConstantsData.projection = m_camera.GetProjectionMatrix();
 
@@ -461,14 +559,18 @@ void D3D12HelloWindow::PopulateCommandList()
     m_commandList->ResourceBarrier(1, &barrier);
 
     CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(m_rtvHeap->GetCPUDescriptorHandleForHeapStart(), m_frameIndex, m_rtvDescriptorSize);
-    m_commandList->OMSetRenderTargets(1, &rtvHandle, FALSE, nullptr);
+    CD3DX12_CPU_DESCRIPTOR_HANDLE dsvHandle(m_dsvHeap->GetCPUDescriptorHandleForHeapStart());
+    m_commandList->OMSetRenderTargets(1, &rtvHandle, FALSE, &dsvHandle);
 
     // Record commands.
     const float clearColor[] = { 0.0f, 0.2f, 0.4f, 1.0f };
     m_commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
+    m_commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
     m_commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+    m_commandList->IASetIndexBuffer(&m_indexBufferView);
     m_commandList->IASetVertexBuffers(0, 1, &m_vertexBufferView);
-    m_commandList->DrawInstanced(3, 1, 0, 0);
+    //m_commandList->DrawInstanced(24, 1, 0, 0);
+    m_commandList->DrawIndexedInstanced(14904, 1, 0, 0, 0);
 
     // Indicate that the back buffer will now be used to present.
     barrier = CD3DX12_RESOURCE_BARRIER::Transition(m_renderTargets[m_frameIndex].get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
