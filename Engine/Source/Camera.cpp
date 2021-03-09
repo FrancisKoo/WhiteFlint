@@ -31,6 +31,6 @@ Matrix Camera::GetProjectionMatrix()
 {
 	using namespace DirectX;
 	Matrix R;
-	XMStoreFloat4x4(&R, XMMatrixPerspectiveFovRH(XMConvertToRadians(m_fov), m_aspectRatio, m_nearPlane, m_farPlane));
+	XMStoreFloat4x4(&R, XMMatrixPerspectiveFovLH(XMConvertToRadians(m_fov), m_aspectRatio, m_nearPlane, m_farPlane));
 	return R;
 }
