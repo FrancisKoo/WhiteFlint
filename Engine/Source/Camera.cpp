@@ -13,15 +13,24 @@ Camera::Camera(Vector3 position, Vector3 rotation, float fov, float aspect, floa
 Matrix Camera::GetViewMatrix()
 {
 	Vector3 eye = m_transform.position;
-	Vector3 euler = m_transform.rotation;
-
 	Vector3 front = m_transform.GetForwardDirection();
+	Vector3 target = eye + front;
+	
 	Vector3 up(0, 1, 0);
 
-	return DirectX::XMMatrixLookAtLH(eye, eye + front, up);
+	using namespace DirectX;
+	Matrix R;
+	XMVECTOR eyev = XMLoadFloat3(&eye);
+	XMVECTOR targetv = XMLoadFloat3(&target);
+	XMVECTOR upv = XMLoadFloat3(&up);
+	XMStoreFloat4x4(&R, XMMatrixLookAtLH(eyev, targetv, upv));
+	return R;
 }
 
 Matrix Camera::GetProjectionMatrix()
 {
-	return DirectX::XMMatrixPerspectiveFovLH(DirectX::XMConvertToRadians(m_fov), m_aspectRatio, m_nearPlane, m_farPlane);
+	using namespace DirectX;
+	Matrix R;
+	XMStoreFloat4x4(&R, XMMatrixPerspectiveFovRH(XMConvertToRadians(m_fov), m_aspectRatio, m_nearPlane, m_farPlane));
+	return R;
 }

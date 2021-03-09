@@ -50,14 +50,12 @@ DirectX::SimpleMath::Vector3 Transform::GetForwardDirection()
 DirectX::SimpleMath::Vector3 Transform::GetRightDirection()
 {
 	Vector3 right = Vector3(0, 1, 0).Cross(GetForwardDirection());
-	right.Normalize();
 	return right;
 }
 
 DirectX::SimpleMath::Vector3 Transform::GetUpDirection()
 {
-	Vector3 right = Vector3(0, 1, 0).Cross(GetForwardDirection());
-	Vector3 up = GetForwardDirection().Cross(right);
+	Vector3 up = GetForwardDirection().Cross(GetRightDirection());
 	up.Normalize();
 	return up;
 }

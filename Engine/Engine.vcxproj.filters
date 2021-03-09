@@ -16,6 +16,9 @@
     <Filter Include="Resource Files\Shaders">
       <UniqueIdentifier>{88c1533c-0a60-4b60-b477-8fd84528ea6b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Resource Files\Models">
+      <UniqueIdentifier>{799a4d56-41cd-4dcd-8075-425a3e60e5f1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="PropertySheet.props" />
@@ -88,8 +91,20 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="Shaders\shaders.hlsl">
+    <CopyFileToFolders Include="Shaders\shaders.hlsl">
       <Filter>Resource Files\Shaders</Filter>
-    </CustomBuild>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="Models\Cube.obj">
+      <Filter>Resource Files\Models</Filter>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="Models\bunny.mtl">
+      <Filter>Resource Files\Models</Filter>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="Models\bunny.obj">
+      <Filter>Resource Files\Models</Filter>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="Models\Cube.mtl">
+      <Filter>Resource Files\Models</Filter>
+    </CopyFileToFolders>
   </ItemGroup>
 </Project>
