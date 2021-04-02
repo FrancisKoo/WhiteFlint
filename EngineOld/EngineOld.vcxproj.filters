@@ -28,7 +28,7 @@
     <Text Include="readme.txt" />
   </ItemGroup>
   <ItemGroup>
-    <Manifest Include="Engine.exe.manifest" />
+    <Manifest Include="EngineOld.exe.manifest" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\pch.cpp">
