@@ -1,0 +1,9 @@
+// Core.idl
+namespace Engine
+{
+    runtimeclass Core
+    {
+        Core();
+        String GetEngineName();
+    };
+}

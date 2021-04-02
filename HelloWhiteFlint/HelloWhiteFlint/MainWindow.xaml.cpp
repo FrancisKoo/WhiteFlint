@@ -4,6 +4,8 @@
 #include "MainWindow.g.cpp"
 #endif
 
+#include <winrt/Engine.h>
+
 using namespace winrt;
 using namespace Microsoft::UI::Xaml;
 
@@ -29,6 +31,7 @@ namespace winrt::HelloWhiteFlint::implementation
 
     void MainWindow::myButton_Click(IInspectable const&, RoutedEventArgs const&)
     {
-        myButton().Content(box_value(L"Clicked"));
+        Engine::Core m_engineCore;
+        myButton().Content(box_value(m_engineCore.GetEngineName()));
     }
 }
