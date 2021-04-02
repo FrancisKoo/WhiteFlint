@@ -9,7 +9,7 @@
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{a1822674-d14f-4a21-bba7-2f9189a6c0c6}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>Engine</RootNamespace>
+    <RootNamespace>EngineOld</RootNamespace>
     <WindowsTargetPlatformVersion Condition=" '$(WindowsTargetPlatformVersion)' == '' ">10.0.19041.0</WindowsTargetPlatformVersion>
     <WindowsTargetPlatformMinVersion>10.0.18362.0</WindowsTargetPlatformMinVersion>
     <ProjectName>EngineOld</ProjectName>
