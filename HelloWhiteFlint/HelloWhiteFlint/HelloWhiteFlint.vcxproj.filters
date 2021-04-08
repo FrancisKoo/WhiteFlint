@@ -19,6 +19,10 @@
     <ClCompile Include="Content\Sample3DSceneRenderer.cpp">
       <Filter>Content</Filter>
     </ClCompile>
+    <ClCompile Include="Content\SampleFpsTextRenderer.cpp">
+      <Filter>Content</Filter>
+    </ClCompile>
+    <ClCompile Include="ClientMain.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -37,6 +41,10 @@
     <ClInclude Include="Content\ShaderStructures.h">
       <Filter>Content</Filter>
     </ClInclude>
+    <ClInclude Include="Content\SampleFpsTextRenderer.h">
+      <Filter>Content</Filter>
+    </ClInclude>
+    <ClInclude Include="ClientMain.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Assets">
@@ -58,5 +66,13 @@
   </ItemGroup>
   <ItemGroup>
     <Manifest Include="app.manifest" />
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Content\SamplePixelShader.hlsl">
+      <Filter>Content</Filter>
+    </FxCompile>
+    <FxCompile Include="Content\SampleVertexShader.hlsl">
+      <Filter>Content</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

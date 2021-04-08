@@ -92,6 +92,7 @@
     <Manifest Include="app.manifest" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ClientMain.h" />
     <ClInclude Include="Common\DeviceResources.h" />
     <ClInclude Include="Common\StepTimer.h" />
     <ClInclude Include="Common\DirectXHelper.h" />
@@ -104,12 +105,14 @@
     <ClInclude Include="MainWindow.xaml.h">
       <DependentUpon>MainWindow.xaml</DependentUpon>
     </ClInclude>
+    <ClInclude Include="Content\SampleFpsTextRenderer.h" />
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml" />
     <Page Include="MainWindow.xaml" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="ClientMain.cpp" />
     <ClCompile Include="Common\DeviceResources.cpp" />
     <ClCompile Include="Content\Sample3DSceneRenderer.cpp" />
     <ClCompile Include="pch.cpp">
@@ -122,6 +125,7 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
     </ClCompile>
     <ClCompile Include="$(GeneratedFilesDir)module.g.cpp" />
+    <ClCompile Include="Content\SampleFpsTextRenderer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Midl Include="App.idl">
@@ -144,6 +148,16 @@
     <ProjectReference Include="..\..\Engine\Engine.vcxproj">
       <Project>{3e543fe1-552e-4df7-9708-ed9b5ed73c20}</Project>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Content\SamplePixelShader.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Content\SampleVertexShader.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+    </FxCompile>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
