@@ -32,6 +32,6 @@ namespace winrt::HelloWhiteFlint::implementation
     void MainWindow::myButton_Click(IInspectable const&, RoutedEventArgs const&)
     {
         Engine::Core m_engineCore;
-        myButton().Content(box_value(m_engineCore.GetEngineName()));
+        myButton().Content(box_value(m_engineCore.GetEngineName() + to_hstring(m_engineCore.GetEngineVersion())));
     }
 }

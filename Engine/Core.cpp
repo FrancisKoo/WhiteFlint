@@ -8,4 +8,10 @@ namespace winrt::Engine::implementation
     {
         return L"White Flint";
     }
+
+	float Core::GetEngineVersion()
+	{
+        return 0.01f;
+	}
+
 }

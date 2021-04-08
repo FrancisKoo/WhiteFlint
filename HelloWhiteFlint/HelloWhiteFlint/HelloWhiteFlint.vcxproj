@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\..\packages\Microsoft.Windows.CppWinRT.2.0.210329.4\build\native\Microsoft.Windows.CppWinRT.props" Condition="Exists('..\..\packages\Microsoft.Windows.CppWinRT.2.0.210329.4\build\native\Microsoft.Windows.CppWinRT.props')" />
+  <Import Project="..\..\packages\Microsoft.Windows.CppWinRT.2.0.210403.2\build\native\Microsoft.Windows.CppWinRT.props" Condition="Exists('..\..\packages\Microsoft.Windows.CppWinRT.2.0.210403.2\build\native\Microsoft.Windows.CppWinRT.props')" />
   <Import Project="..\..\packages\Microsoft.ProjectReunion.WinUI.0.5.0\build\native\Microsoft.ProjectReunion.WinUI.props" Condition="Exists('..\..\packages\Microsoft.ProjectReunion.WinUI.0.5.0\build\native\Microsoft.ProjectReunion.WinUI.props')" />
   <Import Project="..\..\packages\Microsoft.ProjectReunion.Foundation.0.5.0\build\native\Microsoft.ProjectReunion.Foundation.props" Condition="Exists('..\..\packages\Microsoft.ProjectReunion.Foundation.0.5.0\build\native\Microsoft.ProjectReunion.Foundation.props')" />
   <Import Project="..\..\packages\Microsoft.ProjectReunion.0.5.0\build\native\Microsoft.ProjectReunion.props" Condition="Exists('..\..\packages\Microsoft.ProjectReunion.0.5.0\build\native\Microsoft.ProjectReunion.props')" />
@@ -27,29 +27,13 @@
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <ItemGroup Label="ProjectConfigurations">
-    <ProjectConfiguration Include="Debug|Win32">
-      <Configuration>Debug</Configuration>
-      <Platform>Win32</Platform>
-    </ProjectConfiguration>
     <ProjectConfiguration Include="Debug|x64">
       <Configuration>Debug</Configuration>
       <Platform>x64</Platform>
     </ProjectConfiguration>
-    <ProjectConfiguration Include="Debug|arm64">
-      <Configuration>Debug</Configuration>
-      <Platform>arm64</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="Release|Win32">
-      <Configuration>Release</Configuration>
-      <Platform>Win32</Platform>
-    </ProjectConfiguration>
     <ProjectConfiguration Include="Release|x64">
       <Configuration>Release</Configuration>
       <Platform>x64</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="Release|arm64">
-      <Configuration>Release</Configuration>
-      <Platform>arm64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Configuration">
@@ -90,6 +74,9 @@
     <ClCompile>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <Link>
+      <AdditionalDependencies Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">d3d11.lib;dxgi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)'=='Release'">
     <ClCompile>
@@ -98,12 +85,18 @@
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies Condition="'$(Configuration)|$(Platform)'=='Release|x64'">d3d11.lib;dxgi.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <Manifest Include="app.manifest" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Common\DeviceResources.h" />
+    <ClInclude Include="Common\StepTimer.h" />
+    <ClInclude Include="Common\DirectXHelper.h" />
+    <ClInclude Include="Content\Sample3DSceneRenderer.h" />
+    <ClInclude Include="Content\ShaderStructures.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="App.xaml.h">
       <DependentUpon>App.xaml</DependentUpon>
@@ -117,6 +110,8 @@
     <Page Include="MainWindow.xaml" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Common\DeviceResources.cpp" />
+    <ClCompile Include="Content\Sample3DSceneRenderer.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
@@ -154,7 +149,7 @@
   <ImportGroup Label="ExtensionTargets">
     <Import Project="..\..\packages\Microsoft.ProjectReunion.Foundation.0.5.0\build\native\Microsoft.ProjectReunion.Foundation.targets" Condition="Exists('..\..\packages\Microsoft.ProjectReunion.Foundation.0.5.0\build\native\Microsoft.ProjectReunion.Foundation.targets')" />
     <Import Project="..\..\packages\Microsoft.ProjectReunion.WinUI.0.5.0\build\native\Microsoft.ProjectReunion.WinUI.targets" Condition="Exists('..\..\packages\Microsoft.ProjectReunion.WinUI.0.5.0\build\native\Microsoft.ProjectReunion.WinUI.targets')" />
-    <Import Project="..\..\packages\Microsoft.Windows.CppWinRT.2.0.210329.4\build\native\Microsoft.Windows.CppWinRT.targets" Condition="Exists('..\..\packages\Microsoft.Windows.CppWinRT.2.0.210329.4\build\native\Microsoft.Windows.CppWinRT.targets')" />
+    <Import Project="..\..\packages\Microsoft.Windows.CppWinRT.2.0.210403.2\build\native\Microsoft.Windows.CppWinRT.targets" Condition="Exists('..\..\packages\Microsoft.Windows.CppWinRT.2.0.210403.2\build\native\Microsoft.Windows.CppWinRT.targets')" />
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
@@ -165,7 +160,7 @@
     <Error Condition="!Exists('..\..\packages\Microsoft.ProjectReunion.Foundation.0.5.0\build\native\Microsoft.ProjectReunion.Foundation.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.ProjectReunion.Foundation.0.5.0\build\native\Microsoft.ProjectReunion.Foundation.targets'))" />
     <Error Condition="!Exists('..\..\packages\Microsoft.ProjectReunion.WinUI.0.5.0\build\native\Microsoft.ProjectReunion.WinUI.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.ProjectReunion.WinUI.0.5.0\build\native\Microsoft.ProjectReunion.WinUI.props'))" />
     <Error Condition="!Exists('..\..\packages\Microsoft.ProjectReunion.WinUI.0.5.0\build\native\Microsoft.ProjectReunion.WinUI.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.ProjectReunion.WinUI.0.5.0\build\native\Microsoft.ProjectReunion.WinUI.targets'))" />
-    <Error Condition="!Exists('..\..\packages\Microsoft.Windows.CppWinRT.2.0.210329.4\build\native\Microsoft.Windows.CppWinRT.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.Windows.CppWinRT.2.0.210329.4\build\native\Microsoft.Windows.CppWinRT.props'))" />
-    <Error Condition="!Exists('..\..\packages\Microsoft.Windows.CppWinRT.2.0.210329.4\build\native\Microsoft.Windows.CppWinRT.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.Windows.CppWinRT.2.0.210329.4\build\native\Microsoft.Windows.CppWinRT.targets'))" />
+    <Error Condition="!Exists('..\..\packages\Microsoft.Windows.CppWinRT.2.0.210403.2\build\native\Microsoft.Windows.CppWinRT.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.Windows.CppWinRT.2.0.210403.2\build\native\Microsoft.Windows.CppWinRT.props'))" />
+    <Error Condition="!Exists('..\..\packages\Microsoft.Windows.CppWinRT.2.0.210403.2\build\native\Microsoft.Windows.CppWinRT.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.Windows.CppWinRT.2.0.210403.2\build\native\Microsoft.Windows.CppWinRT.targets'))" />
   </Target>
 </Project>

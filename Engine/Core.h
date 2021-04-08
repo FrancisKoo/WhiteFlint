@@ -8,6 +8,8 @@ namespace winrt::Engine::implementation
         Core() = default;
 
         hstring GetEngineName();
+
+        float GetEngineVersion();
     };
 }
 namespace winrt::Engine::factory_implementation
