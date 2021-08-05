@@ -1,0 +1,12 @@
+namespace Engine
+{
+    [default_interface]
+    runtimeclass Core
+    {
+        Core();
+        void CreateRenderer(Microsoft.UI.Xaml.Controls.SwapChainPanel swapChainPanel);
+        void DestroyRenderer();
+
+        void SetClearColor(Windows.UI.Color color);
+    }
+}
